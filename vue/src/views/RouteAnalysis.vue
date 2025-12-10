@@ -749,8 +749,27 @@ export default {
         this.analysisReport = data.analysisReport;
       }
 
+      // 【新增】确保当前活跃的标签页是可见的
+      this.updateActiveTab();
+
       // 更新图表
       this.updateCharts();
+    },
+
+    // 确保当前活跃标签页有效
+    updateActiveTab() {
+      const selectedTypes = this.filterForm.analysisTypes;
+
+      // 1. 如果当前活跃标签页不在已选类型中
+      if (!selectedTypes.includes(this.activeTab)) {
+        // 2. 尝试切换到第一个选中的类型
+        if (selectedTypes.length > 0) {
+          this.activeTab = selectedTypes[0];
+        } else {
+          // 3. 如果没有任何选中类型，则设置默认值或空值（避免报错）
+          this.activeTab = '';
+        }
+      }
     },
 
     // 更新图表
