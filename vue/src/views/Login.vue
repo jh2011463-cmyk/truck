@@ -104,12 +104,23 @@ export default {
           this.request.post("/user/login", this.user).then(res => {
             if(res.code === '200') {
               localStorage.setItem("user", JSON.stringify(res.data))  // 存储用户信息到浏览器
-              localStorage.setItem("menus", JSON.stringify(res.data.menus))  // 存储用户信息到浏览器
+              
+              // 检查返回的菜单数据是否存在
+              if (res.data.menus && res.data.menus.length > 0) {
+                localStorage.setItem("menus", JSON.stringify(res.data.menus))  // 存储菜单信息到浏览器
+              } else {
+                console.warn("后端未返回菜单数据，将使用默认菜单");
+                // 不设置menus，让setRoutes函数处理默认菜单
+              }
 
               // 动态设置当前用户的路由
               setRoutes()
-              this.$router.push("/")
-              this.$message.success("登录成功")
+              
+              // 确保路由已设置后再跳转
+              this.$nextTick(() => {
+                this.$router.push("/")
+                this.$message.success("登录成功")
+              })
             } else {
               this.$message.error(res.msg)
             }

@@ -44,11 +44,103 @@ export default {
     logoTextShow: Boolean
   },
   data() {
+    // 默认菜单数据，确保即使没有从后端获取到菜单数据，侧边栏也能正常显示
+    const defaultMenus = [
+      {
+        id: 1,
+        name: "首页",
+        path: "/home",
+        icon: "el-icon-s-home",
+        children: []
+      },
+      {
+        id: 2,
+        name: "线路管理",
+        path: "",
+        icon: "el-icon-location",
+        children: [
+          {
+            id: 21,
+            name: "线路列表",
+            path: "/routelist",
+            icon: "el-icon-document",
+            children: []
+          },
+          {
+            id: 22,
+            name: "线路规划",
+            path: "/routeplan",
+            icon: "el-icon-guide",
+            children: []
+          },
+          {
+            id: 23,
+            name: "线路分析",
+            path: "/routeanalysis",
+            icon: "el-icon-data-analysis",
+            children: []
+          }
+        ]
+      },
+      {
+        id: 3,
+        name: "车辆管理",
+        path: "/truck",
+        icon: "el-icon-truck",
+        children: []
+      },
+      {
+        id: 4,
+        name: "订单管理",
+        path: "/orderform",
+        icon: "el-icon-s-order",
+        children: []
+      },
+      {
+        id: 5,
+        name: "用户管理",
+        path: "/user",
+        icon: "el-icon-user",
+        children: []
+      },
+      {
+        id: 6,
+        name: "系统设置",
+        path: "",
+        icon: "el-icon-setting",
+        children: [
+          {
+            id: 61,
+            name: "菜单管理",
+            path: "/menu",
+            icon: "el-icon-menu",
+            children: []
+          },
+          {
+            id: 62,
+            name: "角色管理",
+            path: "/role",
+            icon: "el-icon-s-custom",
+            children: []
+          }
+        ]
+      }
+    ];
+    
+    const storedMenus = localStorage.getItem("menus") ? JSON.parse(localStorage.getItem("menus")) : defaultMenus;
+    
     return {
-      menus: localStorage.getItem("menus") ? JSON.parse(localStorage.getItem("menus")) : [],
-      opens: localStorage.getItem("menus") ? JSON.parse(localStorage.getItem("menus")).map(v => v.id + '') : []
+      menus: storedMenus,
+      opens: storedMenus.map(v => v.id + '')
     }
   },
+  created() {
+    // 如果localStorage中没有菜单数据，则设置默认菜单数据
+    if (!localStorage.getItem("menus")) {
+      localStorage.setItem("menus", JSON.stringify(this.menus));
+      console.log("已设置默认菜单数据到localStorage");
+    }
+  }
 }
 </script>
 

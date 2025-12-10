@@ -277,10 +277,10 @@ export default {
         distanceRange: [0, 500],
         analysisTypes: ['efficiency', 'cost', 'safety', 'traffic']
       },
-
+      
       // 当前激活的标签页
       activeTab: 'efficiency',
-
+      
       // 统计数据
       stats: {
         totalRoutes: 156,
@@ -288,7 +288,7 @@ export default {
         avgCost: 320,
         avgRisk: 2.3
       },
-
+      
       // 热门线路数据
       popularRoutes: [
         {
@@ -342,11 +342,11 @@ export default {
           riskLevel: 3
         }
       ],
-
+      
       // 分析报告
       analysisReport: null,
       reportDialogVisible: false,
-
+      
       // 图表实例
       charts: {
         efficiency: null,
@@ -364,7 +364,7 @@ export default {
         this.initCharts();
       }, 300);
     });
-
+    
     // 添加窗口大小变化监听
     window.addEventListener('resize', this.handleResize);
   },
@@ -373,7 +373,7 @@ export default {
     activeTab(newTab) {
       this.$nextTick(() => {
         setTimeout(() => {
-          switch (newTab) {
+          switch(newTab) {
             case 'efficiency':
               if (this.filterForm.analysisTypes.includes('efficiency')) {
                 this.initEfficiencyChart();
@@ -405,18 +405,18 @@ export default {
       this.$nextTick(() => {
         // 初始化效率分析图表
         this.initEfficiencyChart();
-
+        
         // 初始化成本分析图表
         this.initCostChart();
-
+        
         // 初始化安全分析图表
         this.initSafetyChart();
-
+        
         // 初始化交通分析图表
         this.initTrafficChart();
       });
     },
-
+    
     // 初始化效率分析图表
     initEfficiencyChart() {
       this.$nextTick(() => {
@@ -426,14 +426,7 @@ export default {
           setTimeout(() => this.initEfficiencyChart(), 200);
           return;
         }
-
-        // 【关键修复】如果图表已存在，先销毁它
-        if (this.charts.efficiency) {
-          this.charts.efficiency.dispose();
-          this.charts.efficiency = null;
-        }
-
-        // 重新初始化图表实例
+        
         this.charts.efficiency = echarts.init(chartDom);
         const option = {
           title: {
@@ -479,11 +472,11 @@ export default {
             }
           ]
         };
-
+        
         this.charts.efficiency.setOption(option);
       });
     },
-
+    
     // 初始化成本分析图表
     initCostChart() {
       this.$nextTick(() => {
@@ -493,14 +486,7 @@ export default {
           setTimeout(() => this.initCostChart(), 200);
           return;
         }
-
-        // 【关键修复】如果图表已存在，先销毁它
-        if (this.charts.cost) {
-          this.charts.cost.dispose();
-          this.charts.cost = null;
-        }
-
-        // 重新初始化图表实例
+        
         this.charts.cost = echarts.init(chartDom);
         const option = {
           title: {
@@ -557,11 +543,11 @@ export default {
             }
           ]
         };
-
+        
         this.charts.cost.setOption(option);
       });
     },
-
+    
     // 初始化安全分析图表
     initSafetyChart() {
       this.$nextTick(() => {
@@ -571,14 +557,7 @@ export default {
           setTimeout(() => this.initSafetyChart(), 200);
           return;
         }
-
-        // 【关键修复】如果图表已存在，先销毁它
-        if (this.charts.safety) {
-          this.charts.safety.dispose();
-          this.charts.safety = null;
-        }
-
-        // 重新初始化图表实例
+        
         this.charts.safety = echarts.init(chartDom);
         const option = {
           title: {
@@ -599,9 +578,9 @@ export default {
               type: 'pie',
               radius: '50%',
               data: [
-                {value: 65, name: '低风险'},
-                {value: 25, name: '中风险'},
-                {value: 10, name: '高风险'}
+                { value: 65, name: '低风险' },
+                { value: 25, name: '中风险' },
+                { value: 10, name: '高风险' }
               ],
               emphasis: {
                 itemStyle: {
@@ -613,11 +592,11 @@ export default {
             }
           ]
         };
-
+        
         this.charts.safety.setOption(option);
       });
     },
-
+    
     // 初始化交通分析图表
     initTrafficChart() {
       this.$nextTick(() => {
@@ -627,14 +606,7 @@ export default {
           setTimeout(() => this.initTrafficChart(), 200);
           return;
         }
-
-        // 【关键修复】如果图表已存在，先销毁它
-        if (this.charts.traffic) {
-          this.charts.traffic.dispose();
-          this.charts.traffic = null;
-        }
-
-        // 重新初始化图表实例
+        
         this.charts.traffic = echarts.init(chartDom);
         const option = {
           title: {
@@ -682,24 +654,24 @@ export default {
             }
           ]
         };
-
+        
         this.charts.traffic.setOption(option);
       });
     },
-
+    
     // 开始分析
     handleAnalyze() {
       this.$message.info('正在加载数据...');
       // 调用后端 API进行分析
       request.post("/route/analysis", this.filterForm).then(res => {
         console.log('后端响应:', res);
-
+        
         // 检查响应是否成功
         if (res && (res.code === '200' || res.code === 200)) {
           // 抽取data中的数据
           const analysisData = res.data || {};
           console.log('分析数据:', analysisData);
-
+          
           // 检查是否有接收到stats数据
           if (analysisData.stats) {
             this.updateAnalysisData(analysisData);
@@ -723,12 +695,12 @@ export default {
         } else if (error && error.response && error.response.data) {
           errorMsg = error.response.data.msg || error.response.data.message || JSON.stringify(error.response.data);
         }
-
+        
         this.$message.warning('分析失败，已使用示例数据应答（错误：' + errorMsg + '）');
         this.useDefaultAnalysisData();
       });
     },
-
+        
     // 使用默认的分析数据
     useDefaultAnalysisData() {
       this.updateAnalysisData({
@@ -742,11 +714,11 @@ export default {
         analysisReport: null
       });
     },
-
+    
     // 更新分析数据
     updateAnalysisData(data) {
       // 根据后端返回的数据结构更新前端
-
+      
       // 处理统计数据
       if (data.stats) {
         // 后端返回的是已经检每的数据结构
@@ -757,7 +729,7 @@ export default {
           avgRisk: data.stats.avgRisk || 2.3
         };
       }
-
+      
       // 处理热门线路数据
       if (data.popularRoutes && data.popularRoutes.length > 0) {
         this.popularRoutes = data.popularRoutes.map(route => ({
@@ -771,35 +743,16 @@ export default {
           riskLevel: route.riskLevel || 0
         }));
       }
-
+      
       // 处理分析报告
       if (data.analysisReport) {
         this.analysisReport = data.analysisReport;
       }
-
-      // 【新增】确保当前活跃的标签页是可见的
-      this.updateActiveTab();
-
+      
       // 更新图表
       this.updateCharts();
     },
-
-    // 确保当前活跃标签页有效
-    updateActiveTab() {
-      const selectedTypes = this.filterForm.analysisTypes;
-
-      // 1. 如果当前活跃标签页不在已选类型中
-      if (!selectedTypes.includes(this.activeTab)) {
-        // 2. 尝试切换到第一个选中的类型
-        if (selectedTypes.length > 0) {
-          this.activeTab = selectedTypes[0];
-        } else {
-          // 3. 如果没有任何选中类型，则设置默认值或空值（避免报错）
-          this.activeTab = '';
-        }
-      }
-    },
-
+    
     // 更新图表
     updateCharts() {
       // 根据后端返回的数据更新图表
@@ -830,7 +783,7 @@ export default {
         }, 100);
       });
     },
-
+    
     // 更新效率分析图表
     updateEfficiencyChart() {
       if (!this.charts.efficiency) return;
@@ -880,7 +833,7 @@ export default {
       };
       this.charts.efficiency.setOption(option);
     },
-
+    
     // 更新成本分析图表
     updateCostChart() {
       if (!this.charts.cost) return;
@@ -941,7 +894,7 @@ export default {
       };
       this.charts.cost.setOption(option);
     },
-
+    
     // 更新安全分析图表
     updateSafetyChart() {
       if (!this.charts.safety) return;
@@ -964,9 +917,9 @@ export default {
             type: 'pie',
             radius: '50%',
             data: [
-              {value: 65, name: '低风险'},
-              {value: 25, name: '中风险'},
-              {value: 10, name: '高风险'}
+              { value: 65, name: '低风险' },
+              { value: 25, name: '中风险' },
+              { value: 10, name: '高风险' }
             ],
             emphasis: {
               itemStyle: {
@@ -980,7 +933,7 @@ export default {
       };
       this.charts.safety.setOption(option);
     },
-
+    
     // 更新交通分析图表
     updateTrafficChart() {
       if (!this.charts.traffic) return;
@@ -1032,7 +985,7 @@ export default {
       };
       this.charts.traffic.setOption(option);
     },
-
+    
     // 导出报告
     handleExport() {
       this.$confirm('确认导出线路数据吗?', '提示', {
@@ -1061,14 +1014,14 @@ export default {
         if (this.filterForm.analysisTypes) {
           params.append('analysisTypes', this.filterForm.analysisTypes.join(','));
         }
-
+            
         window.open("/route/analysis/export?" + params.toString());
         this.$message.success("导出成功")
       }).catch(() => {
         this.$message.info('已取消导出')
       })
     },
-
+    
     // 日期格式化方法
     formatDate(date) {
       if (!date) return '';
@@ -1078,63 +1031,64 @@ export default {
       const day = String(d.getDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
     },
-
+    
     // 导出报告文件
     exportReport() {
       // 调用后端API导出报告文件
       window.open("/route/analysis/export");
       this.$message.success("报告导出成功");
     },
-
+    
     // 刷新数据
     handleRefresh() {
       this.handleAnalyze();
     },
-
+    
     // 获取进度条颜色
     getProgressColor(percentage) {
       if (percentage >= 90) return '#67C23A';
       if (percentage >= 70) return '#E6A23C';
       return '#F56C6C';
     },
-
+    
     // 获取风险等级标签类型
     getRiskTagType(level) {
       if (level <= 2) return 'success';
       if (level <= 3) return 'warning';
       return 'danger';
     },
-
+    
     // 获取风险等级文本
     getRiskText(level) {
       if (level <= 2) return '低';
       if (level <= 3) return '中';
       return '高';
     },
+    
     // 处理窗口大小变化
-    handleResize() {
-      // 延迟执行，避免频繁触发
-      setTimeout(() => {
-        Object.values(this.charts).forEach(chart => {
-          if (chart) {
-            chart.resize();
-          }
-        });
-      }, 300);
-    }
-  },
-  beforeDestroy() {
-    // 移除窗口大小变化监听
-    window.removeEventListener('resize', this.handleResize);
-
-    // 销毁图表实例
-    Object.values(this.charts).forEach(chart => {
-      if (chart) {
-        chart.dispose();
+      handleResize() {
+        // 延迟执行，避免频繁触发
+        setTimeout(() => {
+          Object.values(this.charts).forEach(chart => {
+            if (chart) {
+              chart.resize();
+            }
+          });
+        }, 300);
       }
-    });
-  },
-}
+    },
+    beforeDestroy() {
+      // 移除窗口大小变化监听
+      window.removeEventListener('resize', this.handleResize);
+      
+      // 销毁图表实例
+      Object.values(this.charts).forEach(chart => {
+        if (chart) {
+          chart.dispose();
+        }
+      });
+    }
+  }
 </script>
 
 <style scoped>
