@@ -68,7 +68,6 @@ export default {
       pass: {},
       code: '',
       dialogFormVisible: false,
-      dialogFormVisibleAd: false,
       // 图片验证码
       identifyCode: '',
       // 验证码规则
