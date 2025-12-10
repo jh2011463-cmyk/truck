@@ -51,12 +51,12 @@ export const setRoutes = () => {
         let routePath = item.path.startsWith('/') ? item.path.substring(1) : item.path;
         let itemMenu = { path: routePath, name: item.name, component: () => import('../views/' + item.pagePath + '.vue')}
         manageRoute.children.push(itemMenu)
-      } else if(item.children.length) {
-        item.children.forEach(item => {
-          if (item.path) {
+      } else if(item.children && item.children.length) {
+        item.children.forEach(child => {
+          if (child.path) {
             // 修正路径处理逻辑：确保路径以斜杠开头
-            let routePath = item.path.startsWith('/') ? item.path.substring(1) : item.path;
-            let itemMenu = { path: routePath, name: item.name, component: () => import('../views/' + item.pagePath + '.vue')}
+            let routePath = child.path.startsWith('/') ? child.path.substring(1) : child.path;
+            let itemMenu = { path: routePath, name: child.name, component: () => import('../views/' + child.pagePath + '.vue')}
             manageRoute.children.push(itemMenu)
           }
         })
@@ -83,7 +83,9 @@ router.beforeEach((to, from, next) => {
     if (!menus) {
       next("/login")
     } else {
-      next("/404")
+      // 如果菜单已加载但路由不存在，可能是还没注册，尝试调用 setRoutes
+      setRoutes()
+      next(to.path)
     }
   } else {
     next()

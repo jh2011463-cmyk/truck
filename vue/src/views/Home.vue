@@ -164,15 +164,43 @@ export default {
       stats: {
         totalRoutes: 156,
         activeVehicles: 35,
-        pendingOrders: 12, // 待审批订单数
+        pendingOrders: 12,
         avgEfficiency: 85
       },
+      menuRoutes: {}
     };
   },
   created() {
     this.fetchDashboardData();
+    this.initMenuRoutes();
   },
   methods: {
+    // 初始化菜单路由映射
+    initMenuRoutes() {
+      const menus = localStorage.getItem("menus");
+      if (menus) {
+        const menuList = JSON.parse(menus);
+        console.log('原始菜单数据:', menuList);
+        menuList.forEach(item => {
+          if (item.path) {
+            const routePath = item.path.startsWith('/') ? item.path : '/' + item.path;
+            this.menuRoutes[item.name] = routePath;
+          }
+          if (item.children && item.children.length > 0) {
+            item.children.forEach(child => {
+              if (child.path) {
+                const routePath = child.path.startsWith('/') ? child.path : '/' + child.path;
+                this.menuRoutes[child.name] = routePath;
+              }
+            });
+          }
+        });
+        console.log('菜单路由映射:', this.menuRoutes);
+      } else {
+        console.warn('没有找到菜单数据');
+      }
+    },
+
     // 异步获取仪表盘数据
     fetchDashboardData() {
       // 实际项目中应调用您的 EchartsController 或 DashboardController
@@ -191,58 +219,58 @@ export default {
     },
 
     // ===================================
-    // 路由跳转方法 (已根据 router/index.js 修复路径，并添加了 catch 确保不报错)
+    // 路由跳转方法 (使用菜单中的动态路由)
     // ===================================
     goToRoutePlan() {
-      // 尝试跳转到 /routeplan
-      this.$router.push('/routeplan').catch(err => {
+      const path = this.menuRoutes['线路规划'] || '/routeplan';
+      this.$router.push(path).catch(err => {
         if (err.name !== 'NavigationDuplicated') {
-          console.error("跳转错误：/routeplan", err);
+          console.error("跳转错误：" + path, err);
           this.$message.error("智能线路规划页面跳转失败，请检查路由配置和菜单数据。");
         }
       });
     },
     goToRouteList() {
-      // 尝试跳转到 /routelist
-      this.$router.push('/routelist').catch(err => {
+      const path = this.menuRoutes['线路列表'] || '/routelist';
+      this.$router.push(path).catch(err => {
         if (err.name !== 'NavigationDuplicated') {
-          console.error("跳转错误：/routelist", err);
+          console.error("跳转错误：" + path, err);
           this.$message.error("线路档案管理页面跳转失败，请检查路由配置和菜单数据。");
         }
       });
     },
     goToRouteAnalysis() {
-      // 尝试跳转到 /routeanalysis
-      this.$router.push('/routeanalysis').catch(err => {
+      const path = this.menuRoutes['线路分析'] || '/routeanalysis';
+      this.$router.push(path).catch(err => {
         if (err.name !== 'NavigationDuplicated') {
-          console.error("跳转错误：/routeanalysis", err);
+          console.error("跳转错误：" + path, err);
           this.$message.error("运营数据分析页面跳转失败，请检查路由配置和菜单数据。");
         }
       });
     },
     goToTruckManagement() {
-      // /truck 已经验证成功
-      this.$router.push('/truck').catch(err => {
+      const path = this.menuRoutes['车辆与司机管理'] || '/truck';
+      this.$router.push(path).catch(err => {
         if (err.name !== 'NavigationDuplicated') {
-          console.error("跳转错误：/truck", err);
+          console.error("跳转错误：" + path, err);
           this.$message.error("车辆管理页面跳转失败。");
         }
       });
     },
     goToPendingOrders() {
-      // 假设订单审批页面路由为 /orderform (根据您提供的 OrderForm.vue 文件名推断)
-      this.$router.push('/orderform').catch(err => {
+      const path = this.menuRoutes['订单审批'] || this.menuRoutes['车辆调度订单管理'] || '/orderform';
+      this.$router.push(path).catch(err => {
         if (err.name !== 'NavigationDuplicated') {
-          console.error("跳转错误：/orderform", err);
+          console.error("跳转错误：" + path, err);
           this.$message.error("待处理订单页面跳转失败，请检查路由配置。");
         }
       });
     },
     goToTruckMaintenance() {
-      // 跳转到 /truck，带查询参数进行筛选
-      this.$router.push({ path: '/truck', query: { status: 'maintenance' } }).catch(err => {
+      const path = this.menuRoutes['车辆与司机管理'] || '/truck';
+      this.$router.push({ path: path, query: { status: 'maintenance' } }).catch(err => {
         if (err.name !== 'NavigationDuplicated') {
-          console.error("跳转错误：/truck (maintenance)", err);
+          console.error("跳转错误：" + path, err);
           this.$message.error("车辆保养页面跳转失败，请检查路由配置。");
         }
       });

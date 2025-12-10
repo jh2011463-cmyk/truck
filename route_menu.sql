@@ -11,15 +11,15 @@ SET @parent_menu_id = LAST_INSERT_ID();
 
 -- 3. 添加二级菜单 - 线路列表
 INSERT INTO `sys_menu` (`name`, `path`, `icon`, `description`, `pid`, `page_path`, `sort_num`) 
-VALUES ('线路列表', 'route', 'el-icon-document', '线路信息管理', @parent_menu_id, 'Route', '1');
+VALUES ('线路列表', 'routelist', 'el-icon-document', '线路信息管理', @parent_menu_id, 'Route', '1');
 
 -- 4. 添加二级菜单 - 线路规划
 INSERT INTO `sys_menu` (`name`, `path`, `icon`, `description`, `pid`, `page_path`, `sort_num`) 
-VALUES ('线路规划', 'route-plan', 'el-icon-guide', '智能线路规划', @parent_menu_id, 'RoutePlan', '2');
+VALUES ('线路规划', 'routeplan', 'el-icon-guide', '智能线路规划', @parent_menu_id, 'RoutePlan', '2');
 
 -- 5. 添加二级菜单 - 线路分析
 INSERT INTO `sys_menu` (`name`, `path`, `icon`, `description`, `pid`, `page_path`, `sort_num`) 
-VALUES ('线路分析', 'route-analysis', 'el-icon-data-analysis', '线路数据分析', @parent_menu_id, 'RouteAnalysis', '3');
+VALUES ('线路分析', 'routeanalysis', 'el-icon-data-analysis', '线路数据分析', @parent_menu_id, 'RouteAnalysis', '3');
 
 -- 6. 为管理员角色添加菜单权限（假设管理员角色ID为1）
 -- 获取刚插入的所有菜单ID
