@@ -427,6 +427,13 @@ export default {
           return;
         }
 
+        // 【关键修复】如果图表已存在，先销毁它
+        if (this.charts.efficiency) {
+          this.charts.efficiency.dispose();
+          this.charts.efficiency = null;
+        }
+
+        // 重新初始化图表实例
         this.charts.efficiency = echarts.init(chartDom);
         const option = {
           title: {
@@ -487,6 +494,13 @@ export default {
           return;
         }
 
+        // 【关键修复】如果图表已存在，先销毁它
+        if (this.charts.cost) {
+          this.charts.cost.dispose();
+          this.charts.cost = null;
+        }
+
+        // 重新初始化图表实例
         this.charts.cost = echarts.init(chartDom);
         const option = {
           title: {
@@ -558,6 +572,13 @@ export default {
           return;
         }
 
+        // 【关键修复】如果图表已存在，先销毁它
+        if (this.charts.safety) {
+          this.charts.safety.dispose();
+          this.charts.safety = null;
+        }
+
+        // 重新初始化图表实例
         this.charts.safety = echarts.init(chartDom);
         const option = {
           title: {
@@ -607,6 +628,13 @@ export default {
           return;
         }
 
+        // 【关键修复】如果图表已存在，先销毁它
+        if (this.charts.traffic) {
+          this.charts.traffic.dispose();
+          this.charts.traffic = null;
+        }
+
+        // 重新初始化图表实例
         this.charts.traffic = echarts.init(chartDom);
         const option = {
           title: {
