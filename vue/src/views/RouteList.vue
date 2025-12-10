@@ -22,49 +22,49 @@
       <el-row :gutter="10" class="mb8">
         <el-col :span="1.5">
           <el-button
-            type="primary"
-            plain
-            icon="el-icon-plus"
-            size="mini"
-            @click="handleAdd"
+              type="primary"
+              plain
+              icon="el-icon-plus"
+              size="mini"
+              @click="handleAdd"
           >新增</el-button>
         </el-col>
         <el-col :span="1.5">
           <el-button
-            type="success"
-            plain
-            icon="el-icon-edit"
-            size="mini"
-            :disabled="single"
-            @click="handleUpdate"
+              type="success"
+              plain
+              icon="el-icon-edit"
+              size="mini"
+              :disabled="single"
+              @click="handleUpdate"
           >修改</el-button>
         </el-col>
         <el-col :span="1.5">
           <el-button
-            type="danger"
-            plain
-            icon="el-icon-delete"
-            size="mini"
-            :disabled="multiple"
-            @click="handleDelete"
+              type="danger"
+              plain
+              icon="el-icon-delete"
+              size="mini"
+              :disabled="multiple"
+              @click="handleDelete"
           >删除</el-button>
         </el-col>
         <el-col :span="1.5">
           <el-button
-            type="warning"
-            plain
-            icon="el-icon-download"
-            size="mini"
-            @click="handleExport"
+              type="warning"
+              plain
+              icon="el-icon-download"
+              size="mini"
+              @click="handleExport"
           >导出</el-button>
         </el-col>
         <el-col :span="1.5">
           <el-button
-            type="info"
-            plain
-            icon="el-icon-upload2"
-            size="mini"
-            @click="handleImport"
+              type="info"
+              plain
+              icon="el-icon-upload2"
+              size="mini"
+              @click="handleImport"
           >导入</el-button>
         </el-col>
         <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
@@ -81,18 +81,18 @@
         <el-table-column label="交通状况" align="center" prop="trafficLevel" width="100">
           <template slot-scope="scope">
             <el-tag
-              :type="scope.row.trafficLevel <= 2 ? 'danger' : scope.row.trafficLevel <= 3 ? 'warning' : 'success'"
+                :type="scope.row.trafficLevel <= 2 ? 'danger' : scope.row.trafficLevel <= 3 ? 'warning' : 'success'"
             >{{ getTrafficLevelText(scope.row.trafficLevel) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="评分" align="center" prop="routeScore" width="80">
           <template slot-scope="scope">
             <el-rate
-              v-model="scope.row.routeScore"
-              disabled
-              show-score
-              text-color="#ff9900"
-              score-template="{value}">
+                v-model="scope.row.routeScore"
+                disabled
+                show-score
+                text-color="#ff9900"
+                score-template="{value}">
             </el-rate>
           </template>
         </el-table-column>
@@ -106,16 +106,16 @@
         <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
           <template slot-scope="scope">
             <el-button
-              size="mini"
-              type="text"
-              icon="el-icon-edit"
-              @click="handleUpdate(scope.row)"
+                size="mini"
+                type="text"
+                icon="el-icon-edit"
+                @click="handleUpdate(scope.row)"
             >修改</el-button>
             <el-button
-              size="mini"
-              type="text"
-              icon="el-icon-delete"
-              @click="handleDelete(scope.row)"
+                size="mini"
+                type="text"
+                icon="el-icon-delete"
+                @click="handleDelete(scope.row)"
             >删除</el-button>
             <el-dropdown @command="(command) => handleCommand(command, scope.row)" style="margin-left: 10px">
               <span class="el-dropdown-link">
@@ -133,15 +133,14 @@
       </el-table>
 
       <pagination
-        v-show="total>0"
-        :total="total"
-        :page.sync="queryParams.pageNum"
-        :limit.sync="queryParams.pageSize"
-        @pagination="getList"
+          v-show="total>0"
+          :total="total"
+          :page.sync="queryParams.pageNum"
+          :limit.sync="queryParams.pageSize"
+          @pagination="getList"
       />
     </el-card>
 
-    <!-- 添加或修改线路对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="线路名称" prop="routeName">
@@ -161,10 +160,10 @@
         </el-form-item>
         <el-form-item label="交通状况" prop="trafficLevel">
           <el-rate
-            v-model="form.trafficLevel"
-            :max="5"
-            show-text
-            :texts="['严重拥堵', '拥堵', '缓行', '畅通', '非常畅通']">
+              v-model="form.trafficLevel"
+              :max="5"
+              show-text
+              :texts="['严重拥堵', '拥堵', '缓行', '畅通', '非常畅通']">
           </el-rate>
         </el-form-item>
         <el-form-item label="推荐" prop="isRecommended">
@@ -180,7 +179,6 @@
       </div>
     </el-dialog>
 
-    <!-- 优化线路对话框 -->
     <el-dialog title="优化线路" :visible.sync="optimizeOpen" width="500px" append-to-body>
       <el-form ref="optimizeForm" :model="optimizeForm" label-width="80px">
         <el-form-item label="优化目标">
@@ -198,19 +196,18 @@
       </div>
     </el-dialog>
 
-    <!-- 导入对话框 -->
     <el-dialog :title="upload.title" :visible.sync="upload.open" width="400px" append-to-body>
       <el-upload
-        ref="upload"
-        :limit="1"
-        accept=".xlsx, .xls"
-        :headers="upload.headers"
-        :action="upload.url + '?updateSupport=' + upload.updateSupport"
-        :disabled="upload.isUploading"
-        :on-progress="handleFileUploadProgress"
-        :on-success="handleFileSuccess"
-        :auto-upload="false"
-        drag
+          ref="upload"
+          :limit="1"
+          accept=".xlsx, .xls"
+          :headers="upload.headers"
+          :action="upload.url + '?updateSupport=' + upload.updateSupport"
+          :disabled="upload.isUploading"
+          :on-progress="handleFileUploadProgress"
+          :on-success="handleFileSuccess"
+          :auto-upload="false"
+          drag
       >
         <i class="el-icon-upload"></i>
         <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
@@ -313,6 +310,13 @@ export default {
     this.getList();
   },
   methods: {
+    // 修复：如果 resetForm 不是全局混入，这里提供一个默认实现
+    resetForm(refName) {
+      if (this.$refs[refName]) {
+        this.$refs[refName].resetFields();
+      }
+    },
+
     /** 查询线路列表 */
     getList() {
       this.loading = true;
@@ -339,6 +343,7 @@ export default {
         trafficLevel: 3,
         isRecommended: 0
       };
+      // 修复：确保 resetForm 方法可用
       this.resetForm("form");
     },
     /** 搜索按钮操作 */
@@ -385,13 +390,15 @@ export default {
         if (valid) {
           if (this.form.id != null) {
             updateRoute(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功");
+              // 修复：将 $modal.msgSuccess 替换为 $message.success
+              this.$message.success("修改成功");
               this.open = false;
               this.getList();
             });
           } else {
             addRoute(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功");
+              // 修复：将 $modal.msgSuccess 替换为 $message.success
+              this.$message.success("新增成功");
               this.open = false;
               this.getList();
             });
@@ -402,18 +409,27 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const ids = row.id || this.ids;
-      this.$modal.confirm('是否确认删除线路编号为"' + ids + '"的数据项？').then(function() {
+      // 修复：将 $modal.confirm 替换为 $confirm，并使用箭头函数保持 this 上下文
+      this.$confirm('是否确认删除线路编号为"' + ids + '"的数据项？', '警告', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
         return delRoute(ids);
       }).then(() => {
         this.getList();
-        this.$modal.msgSuccess("删除成功");
-      }).catch(() => {});
+        // 修复：将 $modal.msgSuccess 替换为 $message.success
+        this.$message.success("删除成功");
+      }).catch(() => {
+        // 捕获取消操作或删除失败的错误
+      });
     },
     /** 导出按钮操作 */
     handleExport() {
-      this.download('route/export', {
-        ...this.queryParams
-      }, `route_${new Date().getTime()}.xlsx`);
+      // 修复：替换 this.download 为 window.open
+      const params = new URLSearchParams(this.queryParams).toString();
+      window.open(`/route/export?${params}`);
+      this.$message.success("导出请求已发送");
     },
     /** 导入按钮操作 */
     handleImport() {
@@ -422,8 +438,9 @@ export default {
     },
     /** 下载模板操作 */
     importTemplate() {
-      this.download('route/importTemplate', {
-      }, `route_template_${new Date().getTime()}.xlsx`);
+      // 修复：替换 this.download 为 window.open
+      window.open("/route/importTemplate");
+      this.$message.success("模板下载请求已发送");
     },
     // 文件上传中处理
     handleFileUploadProgress(event, file, fileList) {
@@ -434,6 +451,7 @@ export default {
       this.upload.open = false;
       this.upload.isUploading = false;
       this.$refs.upload.clearFiles();
+      // 这里 alert 使用了 dangerouslyUseHTMLString，保持不变
       this.$alert("<div style='overflow: auto;overflow-x: hidden;max-height: 70vh;padding: 10px 20px 0;'>" + response.msg + "</div>", "导入结果", { dangerouslyUseHTMLString: true });
       this.getList();
     },
@@ -472,7 +490,8 @@ export default {
         objective: this.optimizeForm.objective
       };
       optimizeRoute(data).then(response => {
-        this.$modal.msgSuccess("优化成功");
+        // 修复：将 $modal.msgSuccess 替换为 $message.success
+        this.$message.success("优化成功");
         this.optimizeOpen = false;
         this.getList();
       });
@@ -484,7 +503,8 @@ export default {
         isRecommended: row.isRecommended === 1 ? 0 : 1
       };
       updateRoute(data).then(response => {
-        this.$modal.msgSuccess(row.isRecommended === 1 ? "取消推荐成功" : "推荐成功");
+        // 修复：将 $modal.msgSuccess 替换为 $message.success
+        this.$message.success(row.isRecommended === 1 ? "取消推荐成功" : "推荐成功");
         this.getList();
       });
     },

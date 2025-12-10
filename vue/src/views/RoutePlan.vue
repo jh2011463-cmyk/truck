@@ -111,47 +111,50 @@
           </div>
           <el-tabs v-model="activeTab">
             <el-tab-pane label="推荐方案" name="recommended">
-              <div class="route-result" v-for="(route, index) in planResults" :key="index" v-if="route.isRecommended">
-                <div class="route-header">
-                  <h3>{{ route.routeName }}</h3>
-                  <el-tag type="success">推荐</el-tag>
-                </div>
-                <div class="route-info">
-                  <el-row :gutter="20">
-                    <el-col :span="6">
-                      <div class="info-item">
-                        <span class="label">距离:</span>
-                        <span class="value">{{ route.distance }} km</span>
-                      </div>
-                    </el-col>
-                    <el-col :span="6">
-                      <div class="info-item">
-                        <span class="label">预估时间:</span>
-                        <span class="value">{{ route.estimatedTime }} 分钟</span>
-                      </div>
-                    </el-col>
-                    <el-col :span="6">
-                      <div class="info-item">
-                        <span class="label">预估成本:</span>
-                        <span class="value">¥{{ route.estimatedCost }}</span>
-                      </div>
-                    </el-col>
-                    <el-col :span="6">
-                      <div class="info-item">
-                        <span class="label">综合评分:</span>
-                        <el-rate v-model="route.routeScore" disabled show-score text-color="#ff9900"></el-rate>
-                      </div>
-                    </el-col>
-                  </el-row>
-                </div>
-                <div class="route-description">
-                  <p>{{ route.description }}</p>
-                </div>
-                <div class="route-actions">
-                  <el-button type="primary" @click="selectRoute(route)">选择此方案</el-button>
-                  <el-button @click="viewRouteDetail(route)">查看详情</el-button>
+              <div v-if="recommendedPlans.length > 0">
+                <div class="route-result" v-for="(route, index) in recommendedPlans" :key="index">
+                  <div class="route-header">
+                    <h3>{{ route.routeName }}</h3>
+                    <el-tag type="success">推荐</el-tag>
+                  </div>
+                  <div class="route-info">
+                    <el-row :gutter="20">
+                      <el-col :span="6">
+                        <div class="info-item">
+                          <span class="label">距离:</span>
+                          <span class="value">{{ route.distance }} km</span>
+                        </div>
+                      </el-col>
+                      <el-col :span="6">
+                        <div class="info-item">
+                          <span class="label">预估时间:</span>
+                          <span class="value">{{ route.estimatedTime }} 分钟</span>
+                        </div>
+                      </el-col>
+                      <el-col :span="6">
+                        <div class="info-item">
+                          <span class="label">预估成本:</span>
+                          <span class="value">¥{{ route.estimatedCost }}</span>
+                        </div>
+                      </el-col>
+                      <el-col :span="6">
+                        <div class="info-item">
+                          <span class="label">综合评分:</span>
+                          <el-rate v-model="route.routeScore" disabled show-score text-color="#ff9900"></el-rate>
+                        </div>
+                      </el-col>
+                    </el-row>
+                  </div>
+                  <div class="route-description">
+                    <p>{{ route.description }}</p>
+                  </div>
+                  <div class="route-actions">
+                    <el-button type="primary" @click="selectRoute(route)">选择此方案</el-button>
+                    <el-button @click="viewRouteDetail(route)">查看详情</el-button>
+                  </div>
                 </div>
               </div>
+              <el-empty v-else description="暂无推荐线路方案"></el-empty>
             </el-tab-pane>
             <el-tab-pane label="所有方案" name="all">
               <div class="route-result" v-for="(route, index) in planResults" :key="index">
@@ -244,6 +247,19 @@ import request from '@/utils/request'
 export default {
   name: 'RoutePlan',
   data() {
+    // 引用 this.validateArrivalAfterDeparture，确保它能访问到 this
+    const validateArrivalAfterDeparture = (rule, value, callback) => {
+      if (this.planForm.departureTime && value) {
+        if (new Date(value).getTime() <= new Date(this.planForm.departureTime).getTime()) {
+          callback(new Error('预期到达时间必须晚于出发时间'));
+        } else {
+          callback();
+        }
+      } else {
+        callback(); // 交给 required 规则处理
+      }
+    };
+
     return {
       // 表单数据
       planForm: {
@@ -256,7 +272,7 @@ export default {
         departureTime: '',
         expectedArrivalTime: ''
       },
-      
+
       // 表单验证规则
       rules: {
         startAddress: [
@@ -273,22 +289,41 @@ export default {
         ],
         cargoType: [
           { required: true, message: '请选择货物类型', trigger: 'change' }
+        ],
+        // 【修复 1】新增时间字段校验
+        departureTime: [
+          { required: true, message: '请选择出发时间', trigger: 'change' }
+        ],
+        expectedArrivalTime: [
+          { required: true, message: '请选择预期到达时间', trigger: 'change' },
+          { validator: validateArrivalAfterDeparture, trigger: 'change' }
         ]
       },
-      
+
       // 规划结果
       planResults: [],
       activeTab: 'recommended',
-      
+
       // 选中的线路
       selectedRoute: null,
       detailDialogVisible: false,
-      
+
       // 地址自动完成数据
       addressSuggestions: []
     }
   },
+
+  // 【修复 2】新增计算属性
+  computed: {
+    recommendedPlans() {
+      // 过滤出所有被推荐的方案
+      return this.planResults.filter(route => route.isRecommended);
+    }
+  },
+
   methods: {
+    // 【修复 1】自定义验证器已移动到 data() 内部，使用闭包引用
+
     // 地址自动完成
     querySearch(queryString, cb) {
       // 这里可以调用地址API获取建议地址
@@ -303,33 +338,33 @@ export default {
         { value: '成都市武侯区' },
         { value: '重庆市渝中区' }
       ];
-      
+
       const results = queryString ? suggestions.filter(item => item.value.toLowerCase().includes(queryString.toLowerCase())) : suggestions;
       cb(results);
     },
-    
+
     // 选择起点
     handleSelectStart(item) {
       this.planForm.startAddress = item.value;
     },
-    
+
     // 选择终点
     handleSelectEnd(item) {
       this.planForm.endAddress = item.value;
     },
-    
+
     // 添加途经点
     addWaypoint() {
       this.planForm.waypoints.push({
         address: ''
       });
     },
-    
+
     // 删除途经点
     removeWaypoint(index) {
       this.planForm.waypoints.splice(index, 1);
     },
-    
+
     // 开始规划
     handlePlan() {
       this.$refs['planForm'].validate((valid) => {
@@ -402,19 +437,18 @@ export default {
         }
       });
     },
-    
-    // 选择线路
+
+    // 选择线路 (核心方法)
     selectRoute(route) {
       this.selectedRoute = route;
       this.detailDialogVisible = true;
     },
-    
-    // 查看线路详情
+
+    // 【修复 3】查看线路详情 (调用核心方法，消除冗余)
     viewRouteDetail(route) {
-      this.selectedRoute = route;
-      this.detailDialogVisible = true;
+      this.selectRoute(route);
     },
-    
+
     // 确认选择线路
     confirmSelectRoute() {
       if (this.selectedRoute) {
@@ -429,20 +463,21 @@ export default {
             this.$message.error("线路保存失败");
           }
         }).catch(() => {
-          this.$message.success("线路保存成功");
+          this.$message.success("线路保存成功 (模拟)");
           this.detailDialogVisible = false;
-          this.$router.push('/route');
+          // 确保路由 /route 是存在的，如果不存在，页面可能会报错
+          // this.$router.push('/route');
         });
       }
     },
-    
+
     // 保存方案
     handleSavePlan() {
       if (this.planResults.length === 0) {
         this.$message.warning("请先进行线路规划");
         return;
       }
-      
+
       // 保存规划方案到后端
       request.post("/route/savePlan", {
         planForm: this.planForm,
@@ -454,10 +489,10 @@ export default {
           this.$message.error("方案保存失败");
         }
       }).catch(() => {
-        this.$message.success("方案保存成功");
+        this.$message.success("方案保存成功 (模拟)");
       });
     },
-    
+
     // 清空
     handleClear() {
       this.$refs['planForm'].resetFields();
