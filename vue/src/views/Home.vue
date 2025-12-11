@@ -190,32 +190,30 @@ export default {
       });
     },
 
-    // ===================================
-    // 路由跳转方法 (已根据 router/index.js 修复路径，并添加了 catch 确保不报错)
-    // ===================================
+
     goToRoutePlan() {
       // 尝试跳转到 /routeplan
-      this.$router.push('/routeplan').catch(err => {
+      this.$router.push('/route').catch(err => {
         if (err.name !== 'NavigationDuplicated') {
-          console.error("跳转错误：/routeplan", err);
+          console.error("跳转错误：/route", err);
           this.$message.error("智能线路规划页面跳转失败，请检查路由配置和菜单数据。");
         }
       });
     },
     goToRouteList() {
       // 尝试跳转到 /routelist
-      this.$router.push('/routelist').catch(err => {
+      this.$router.push('/route').catch(err => {
         if (err.name !== 'NavigationDuplicated') {
-          console.error("跳转错误：/routelist", err);
+          console.error("跳转错误：/route", err);
           this.$message.error("线路档案管理页面跳转失败，请检查路由配置和菜单数据。");
         }
       });
     },
     goToRouteAnalysis() {
       // 尝试跳转到 /routeanalysis
-      this.$router.push('/routeanalysis').catch(err => {
+      this.$router.push('/route').catch(err => {
         if (err.name !== 'NavigationDuplicated') {
-          console.error("跳转错误：/routeanalysis", err);
+          console.error("跳转错误：/route", err);
           this.$message.error("运营数据分析页面跳转失败，请检查路由配置和菜单数据。");
         }
       });
@@ -231,9 +229,9 @@ export default {
     },
     goToPendingOrders() {
       // 假设订单审批页面路由为 /orderform (根据您提供的 OrderForm.vue 文件名推断)
-      this.$router.push('/orderform').catch(err => {
+      this.$router.push('/OrderForm').catch(err => {
         if (err.name !== 'NavigationDuplicated') {
-          console.error("跳转错误：/orderform", err);
+          console.error("跳转错误：/OrderForm", err);
           this.$message.error("待处理订单页面跳转失败，请检查路由配置。");
         }
       });
