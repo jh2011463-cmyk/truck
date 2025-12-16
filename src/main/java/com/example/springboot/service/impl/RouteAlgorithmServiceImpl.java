@@ -286,7 +286,7 @@ public class RouteAlgorithmServiceImpl implements IRouteAlgorithmService {
      */
     @Override
     public Route optimizeRoute(Route route) {
-        return null;
+        return optimizeRoute(route, Collections.singletonList("balanced")).get(0);
     }
 
     /**
@@ -883,6 +883,36 @@ public class RouteAlgorithmServiceImpl implements IRouteAlgorithmService {
         optimizedRoute.setIsRecommended(1); // 标记为推荐路线
 
         return optimizedRoute;
+    }
+
+    @Override
+    public List<Route> optimizeRoute(Route route, List<String> objectives) {
+        if (route == null) {
+            return Collections.emptyList();
+        }
+
+        if (objectives == null || objectives.isEmpty()) {
+            objectives = Collections.singletonList("balanced");
+        }
+
+        List<Route> results = new ArrayList<>();
+        for (String objective : objectives) {
+            Route candidate = optimizeRoute(route, objective);
+            if (candidate != null) {
+                // 保留原始ID以便前端合并，但不直接覆盖数据库
+                candidate.setId(route.getId());
+                candidate.setIsRecommended(candidate.getRouteScore() != null && candidate.getRouteScore() > 0.75 ? 1 : 0);
+                candidate.setRemark("优化目标: " + objective);
+                results.add(candidate);
+            }
+        }
+
+        // 按评分降序返回
+        results.sort((a, b) -> Double.compare(
+            b.getRouteScore() != null ? b.getRouteScore() : 0,
+            a.getRouteScore() != null ? a.getRouteScore() : 0
+        ));
+        return results;
     }
 
     @Override

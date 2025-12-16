@@ -271,7 +271,7 @@ public class RouteController {
         return Result.success(trafficLevel);
     }
 
-    // 线路优化建议
+    // 线路优化建议与分析
     @GetMapping("/optimizationSuggestions/{id}")
     public Result getOptimizationSuggestions(@PathVariable Integer id) {
         Route route = routeService.getById(id);
@@ -279,8 +279,23 @@ public class RouteController {
             return Result.error("404", "线路不存在");
         }
 
-        List<String> suggestions = routeAlgorithmService.generateOptimizationSuggestions(route);
-        return Result.success(suggestions);
+        Map<String, Object> analysis = new HashMap<>();
+        analysis.put("costBenefit", routeAlgorithmService.analyzeCostBenefit(route));
+
+        double distance = route.getDistance() != null ? route.getDistance() : 0;
+        double estimatedCost = Math.round(distance * 2.5);
+        double estimatedRevenue = Math.round(distance * 10);
+        analysis.put("estimatedCost", estimatedCost);
+        analysis.put("estimatedRevenue", estimatedRevenue);
+
+        int riskLevel = routeAlgorithmService.assessRouteRisk(route);
+        analysis.put("riskLevel", riskLevel);
+        int trafficLevel = routeAlgorithmService.evaluateRealTimeTraffic(route);
+        analysis.put("trafficLevel", trafficLevel);
+        analysis.put("riskFactors", "交通等级" + trafficLevel + "，风险等级" + riskLevel);
+        analysis.put("suggestions", routeAlgorithmService.generateOptimizationSuggestions(route));
+
+        return Result.success(analysis);
     }
 
     // 线路预测
@@ -419,20 +434,23 @@ public class RouteController {
         }
     }
 
-    // 单个线路优化
+    // 单个线路优化（返回候选方案，不直接落库）
     @PostMapping("/optimize/{id}")
-    public Result optimizeRoute(@PathVariable Integer id) {
+    public Result optimizeRoute(@PathVariable Integer id,
+                                @RequestBody(required = false) Map<String, Object> payload) {
         try {
             Route route = routeService.getById(id);
             if (route == null) {
                 return Result.error("404", "线路不存在");
             }
-            
-            // 使用智能算法服务优化线路
-            Route optimizedRoute = routeAlgorithmService.optimizeRoute(route);
-            routeService.updateById(optimizedRoute);
-            
-            return Result.success(optimizedRoute);
+
+            @SuppressWarnings("unchecked")
+            List<String> objectives = payload != null ? (List<String>) payload.get("objectives") : null;
+
+            // 使用智能算法服务优化线路，提供多方案给前端选择
+            List<Route> optimizedRoutes = routeAlgorithmService.optimizeRoute(route, objectives);
+
+            return Result.success(optimizedRoutes);
         } catch (Exception e) {
             return Result.error("线路优化失败: " + e.getMessage());
         }

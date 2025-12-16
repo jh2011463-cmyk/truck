@@ -119,13 +119,29 @@
           <el-checkbox label="cost" :disabled="optimizeLoading">成本最低</el-checkbox>
           <el-checkbox label="safety" :disabled="optimizeLoading">安全最高</el-checkbox>
         </el-checkbox-group>
+        <el-alert
+            title="选择多个目标可一次生成多套方案，按评分排序"
+            type="info"
+            show-icon
+            :closable="false"
+            style="margin-top: 12px;" />
       </div>
       <div class="optimize-results" v-if="optimizedRoutes.length > 0" v-loading="optimizeLoading">
         <h3>优化结果</h3>
         <el-table :data="optimizedRoutes" border style="width: 100%" :disabled="optimizeApplying || optimizeLoading">
+          <el-table-column prop="objective" label="优化目标" width="120">
+            <template slot-scope="scope">
+              {{ getObjectiveText(scope.row.objective) }}
+            </template>
+          </el-table-column>
           <el-table-column prop="routeName" label="线路名称"></el-table-column>
           <el-table-column prop="distance" label="距离(km)"></el-table-column>
           <el-table-column prop="estimatedTime" label="预估时间(分钟)"></el-table-column>
+          <el-table-column label="评分变化" width="120">
+            <template slot-scope="scope">
+              {{ formatScoreDelta(scope.row) }}
+            </template>
+          </el-table-column>
           <el-table-column prop="routeScore" label="综合评分">
             <template slot-scope="scope">
               <el-rate v-model="scope.row.routeScore" disabled show-score text-color="#ff9900"></el-rate>
@@ -244,6 +260,13 @@ export default {
       currentOptimizeRoute: null,
       optimizeLoading: false,
       optimizeApplying: false,
+      objectiveLabels: {
+        time: '时间最短',
+        distance: '距离最短',
+        cost: '成本最低',
+        safety: '安全最高',
+        balanced: '综合优化'
+      },
       detailDialogVisible: false,
       currentRoute: null,
       routeAnalysis: null,
@@ -411,37 +434,23 @@ export default {
     loadRouteAnalysis(routeId) {
       this.analysisLoading = true
       getOptimizationSuggestions(routeId).then(res => {
+        const fallback = this.getDefaultAnalysis()
         if (res.code === '200' && res.data) {
-          this.routeAnalysis = res.data
-        } else {
-          // 使用模拟数据
+          const data = res.data
           this.routeAnalysis = {
-            costBenefit: 1.25,
-            estimatedCost: 250,
-            estimatedRevenue: 312.5,
-            riskLevel: 2,
-            riskFactors: "距离适中，交通状况良好",
-            suggestions: [
-              "建议在非高峰时段出行，可减少20%的时间成本",
-              "当前线路评分较高，可作为推荐线路",
-              "可在中途设置休息点，提高运输安全性"
-            ]
+            costBenefit: data.costBenefit || fallback.costBenefit,
+            estimatedCost: data.estimatedCost || fallback.estimatedCost,
+            estimatedRevenue: data.estimatedRevenue || fallback.estimatedRevenue,
+            riskLevel: data.riskLevel || fallback.riskLevel,
+            riskFactors: data.riskFactors || fallback.riskFactors,
+            suggestions: Array.isArray(data.suggestions) ? data.suggestions : fallback.suggestions
           }
+        } else {
+          this.routeAnalysis = fallback
         }
       }).catch(() => {
         // 请求失败时使用模拟数据
-        this.routeAnalysis = {
-          costBenefit: 1.25,
-          estimatedCost: 250,
-          estimatedRevenue: 312.5,
-          riskLevel: 2,
-          riskFactors: "距离适中，交通状况良好",
-          suggestions: [
-            "建议在非高峰时段出行，可减少20%的时间成本",
-            "当前线路评分较高，可作为推荐线路",
-            "可在中途设置休息点，提高运输安全性"
-          ]
-        }
+        this.routeAnalysis = this.getDefaultAnalysis()
       }).finally(() => {
         this.analysisLoading = false
       })
@@ -468,7 +477,18 @@ export default {
         objectives: this.optimizeObjectives
       }).then(res => {
         if (res.code === '200' && res.data) {
-          this.optimizedRoutes = res.data
+          const baseScore = this.currentOptimizeRoute && this.currentOptimizeRoute.routeScore ? this.currentOptimizeRoute.routeScore : 0
+          const normalize = (routes) => routes.map((item, idx) => ({
+            ...item,
+            objective: item.objective || this.optimizeObjectives[idx] || 'balanced',
+            routeScore: item.routeScore || 0,
+            _baseScore: baseScore
+          }))
+          if (Array.isArray(res.data)) {
+            this.optimizedRoutes = normalize(res.data)
+          } else {
+            this.optimizedRoutes = normalize([res.data])
+          }
           this.$message.success("优化完成")
         } else {
           this.$message.error(res.msg || "优化失败")
@@ -480,19 +500,22 @@ export default {
             routeName: "时间优化线路",
             distance: 80,
             estimatedTime: 90,
-            routeScore: 0.85
+            routeScore: 0.85,
+            objective: 'time'
           },
           {
             routeName: "距离优化线路",
             distance: 70,
             estimatedTime: 110,
-            routeScore: 0.82
+            routeScore: 0.82,
+            objective: 'distance'
           },
           {
             routeName: "成本优化线路",
             distance: 90,
             estimatedTime: 130,
-            routeScore: 0.78
+            routeScore: 0.78,
+            objective: 'cost'
           }
         ]
         this.$message.success("优化完成")
@@ -605,6 +628,34 @@ export default {
       if (level <= 2) return '低'
       if (level <= 3) return '中'
       return '高'
+    },
+
+    // 优化目标文本
+    getObjectiveText(label) {
+      return this.objectiveLabels[label] || '综合优化'
+    },
+
+    // 评分变化展示
+    formatScoreDelta(route) {
+      const base = route._baseScore !== undefined ? route._baseScore : (this.currentOptimizeRoute && this.currentOptimizeRoute.routeScore ? this.currentOptimizeRoute.routeScore : 0)
+      const delta = (route.routeScore || 0) - base
+      return `${delta >= 0 ? '+' : ''}${delta.toFixed(2)}`
+    },
+
+    // 默认分析数据
+    getDefaultAnalysis() {
+      return {
+        costBenefit: 1.25,
+        estimatedCost: 250,
+        estimatedRevenue: 312.5,
+        riskLevel: 2,
+        riskFactors: "距离适中，交通状况良好",
+        suggestions: [
+          "建议在非高峰时段出行，可减少20%的时间成本",
+          "当前线路评分较高，可作为推荐线路",
+          "可在中途设置休息点，提高运输安全性"
+        ]
+      }
     }
   }
 }

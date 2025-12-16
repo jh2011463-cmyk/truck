@@ -102,6 +102,14 @@ public interface IRouteAlgorithmService {
     Route optimizeRoute(Route route);
 
     /**
+     * 按目标列表返回多方案优化结果
+     * @param route 线路对象
+     * @param objectives 优化目标集合
+     * @return 多个优化候选方案
+     */
+    List<Route> optimizeRoute(Route route, List<String> objectives);
+
+    /**
      * 线路分析
      * @param params 分析参数
      * @return 分析结果

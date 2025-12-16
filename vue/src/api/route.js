@@ -30,7 +30,7 @@ export function addRoute(data) {
 export function updateRoute(data) {
   return request({
     url: '/route',
-    method: 'put',
+    method: 'post',
     data: data
   })
 }
@@ -56,7 +56,8 @@ export function exportRoute(query) {
   return request({
     url: '/route/export',
     method: 'get',
-    params: query
+    params: query,
+    responseType: 'blob'
   })
 }
 
@@ -65,7 +66,7 @@ export function batchOptimizeRoutes(data) {
   return request({
     url: '/route/optimize/batch',
     method: 'post',
-    data: data
+    data: { ids: data }
   })
 }
 
@@ -152,7 +153,7 @@ export function evaluateRealTimeTraffic(id) {
 // 获取优化建议
 export function getOptimizationSuggestions(id) {
   return request({
-    url: '/route/suggestions/' + id,
+    url: '/route/optimizationSuggestions/' + id,
     method: 'get'
   })
 }
